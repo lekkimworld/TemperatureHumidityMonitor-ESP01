@@ -86,6 +86,12 @@ void readData() {
 }
 
 void printData() {
+  // validate
+  if (!ensureValidData()) {
+    Serial.println("Temperatur or humidity is NaN - check for sensor or loose connections - aborting print...");
+    return;
+  }
+  
   Serial.print("Humidity: ");
   Serial.print(hum);
   Serial.print(" %, ");
@@ -95,6 +101,12 @@ void printData() {
 }
 
 void sendData() {
+  // validate
+  if (!ensureValidData()) {
+    Serial.println("Temperatur or humidity is NaN - check for sensor or loose connections - aborting send...");
+    return;
+  }
+  
   // prepare content
   String content = "[{\"sensorId\": \"";
   content += sensorId_Temp;
@@ -122,5 +134,13 @@ void sendData() {
   http.end();
 
   Serial.println("Sent to server...");
+}
+
+uint8_t ensureValidData() {
+  if (isnan(temp) || isnan(hum)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 

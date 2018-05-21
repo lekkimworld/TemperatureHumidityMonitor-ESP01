@@ -11,7 +11,7 @@
 #define DELAY_POST_DATA 120000L            // delay between updates, in milliseconds
 #define DELAY_PRINT 15000L
 #define DELAY_READ 5000L
-#define DELAY_CONNECT_ATTEMPT 5000L
+#define DELAY_CONNECT_ATTEMPT 10000L
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
@@ -19,6 +19,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 // data
+uint8_t reconnect;
 float temp;
 float hum;
 
@@ -34,24 +35,36 @@ void setup() {
   Serial.begin(115200);
   
   // Start up the sensors
+  Serial.println("Version: 6");
   Serial.println("Initializing sensors");
   Serial.println("Using DHT Sensor");
-
-  // init wifi
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP(ssid, pass);
 }
 
 void loop() {
   wl_status_t status = WiFi.status();
   if (status != WL_CONNECTED && ((unsigned long)millis() - lastConnectAttempt > DELAY_CONNECT_ATTEMPT)) {
-    // not connected - wait
+    // not connected - init wifi
+    WiFi.mode(WIFI_STA);
+    WiFiMulti.addAP(ssid1, pass1);
+    if (strlen(ssid2) > 0) {
+      WiFiMulti.addAP(ssid2, pass2);
+    }
+    Serial.println("Not connected attempting reconnect...");
     lastConnectAttempt = millis();
     if (WiFiMulti.run() != WL_CONNECTED) {
-      Serial.println("Not connected...");
+      reconnect++;
+      Serial.print("Could not reconnect (attempt: ");
+      Serial.print(reconnect);
+      Serial.println(")...");
+      if (reconnect >= 3) {
+        Serial.println("Resetting...");
+        ESP.reset();
+        return;
+      }
     }
-
+    
   } else if (status == WL_CONNECTED) {
+    reconnect = 0;
     // read sensors if applicable
     if ((((unsigned long)millis()) - lastRead) > DELAY_READ) {
       Serial.println("Read temperatures...");

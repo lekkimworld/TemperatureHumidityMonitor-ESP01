@@ -101,7 +101,6 @@ void readData() {
 void printData() {
   // validate
   if (!ensureValidData()) {
-    Serial.println("Temperatur or humidity is NaN - check for sensor or loose connections - aborting print...");
     return;
   }
   
@@ -116,28 +115,46 @@ void printData() {
 void sendData() {
   // validate
   if (!ensureValidData()) {
-    Serial.println("Temperatur or humidity is NaN - check for sensor or loose connections - aborting send...");
     return;
   }
   
   // prepare content
-  String content = "[{\"sensorId\": \"";
-  content += sensorId_Temp;
-  content += String("\", \"sensorValue\": ");
-  content += String(temp, TEMP_DECIMALS);
-  content += String("}, {\"sensorId\": \"");
-  content += sensorId_Hum;
-  content += String("\", \"sensorValue\": ");
-  content += String(hum, HUM_DECIMALS);
-  content += String("}]");
-  Serial.print("Content: ");
-  Serial.println(content);
+  // data = 20
+  // obj_json = 33
+  // array_brackets = 2
+  // obj_sep_comma = 2
+  // n*data + n * obj_json + array_brackets + (n-1)*obj_sep_comma
+  char content[110];
+  char str_temp[8];
+  char str_hum[8];
+  dtostrf(temp, 6, TEMP_DECIMALS, str_temp);
+  dtostrf(hum, 6, HUM_DECIMALS, str_hum);
+  
+  strcpy(content, "[{\"sensorId\": \"");
+  strcat(content, sensorId_Temp);
+  strcat(content, "\", \"sensorValue\": ");
+  strcat(content, str_temp);
+  strcat(content, "}, {\"sensorId\": \"");
+  strcat(content, sensorId_Hum);
+  strcat(content, "\", \"sensorValue\": ");
+  strcat(content, str_hum);
+  strcat(content, "}]");
+  
+  // prepare headers
+  uint8_t contentLength = strlen(content) + 4;
+  char str_contentLength[4];
+  sprintf (str_contentLength, "%03i", contentLength);
+  Serial.print("Content-Length: ");
+  Serial.println(str_contentLength);
+  Serial.print("Payload: <");
+  Serial.print(content);
+  Serial.println(">");
 
   // send
   HTTPClient http;
   http.begin(server);
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("Content-Length", String(content.length() + 4));
+  http.addHeader("Content-Length", str_contentLength);
   int httpCode = http.POST(content);
   String payload = http.getString();                  //Get the response payload
 
@@ -151,6 +168,7 @@ void sendData() {
 
 uint8_t ensureValidData() {
   if (isnan(temp) || isnan(hum)) {
+    Serial.println("Temperatur or humidity is NaN - check for sensor or loose connections - aborting...");
     return false;
   } else {
     return true;

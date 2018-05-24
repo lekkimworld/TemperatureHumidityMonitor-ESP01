@@ -10,6 +10,7 @@ The device built is mounted in a ABS enclosure and use a 220V AC to 3.3V DC conv
 * 3 10k Ohm resistors
 * 2 push buttons
 * 1 DHT22 sensor
+* 1 100uF capacitor used as a decoupling capacitor for the ESP-01
 * Female headers
 * ABS enclosure
 * Wires, PCB, solder and patience

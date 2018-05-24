@@ -1,4 +1,4 @@
-#TemperatureHumidityMonitor from ESP-01
+# TemperatureHumidityMonitor from ESP-01
 
 Is the Arduino C code for a temperature and humidity sensor running on top of an ESP-01 wifi-chip using a DHT22 sensor to measure temperature and humidity. The data is read contineously, printed to `Serial` on a contineous basis for debug as well as sent to a cloud service contineously. The data is POSTed as JSON in a fire-and-forget manner.
 

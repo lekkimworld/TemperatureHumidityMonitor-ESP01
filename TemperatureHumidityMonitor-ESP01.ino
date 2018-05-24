@@ -6,16 +6,16 @@
 #include "vars.h"
 
 // defines
-#define TEMP_DECIMALS 2
-#define HUM_DECIMALS 2
-#define DELAY_POST_DATA 120000L            // delay between updates, in milliseconds
-#define DELAY_PRINT 15000L
-#define DELAY_READ 5000L
-#define DELAY_CONNECT_ATTEMPT 10000L
-#define DHTPIN 2
-#define DHTTYPE DHT22
+#define TEMP_DECIMALS 2                 // decimals for temperature
+#define HUM_DECIMALS 2                  // decimals for humidity
+#define DELAY_POST_DATA 120000L         // delay between updates, in milliseconds
+#define DELAY_PRINT 15000L              // delay between printing to the console, in milliseconds
+#define DELAY_READ 5000L                // delay between reading the sensor(s), in milliseconds
+#define DELAY_CONNECT_ATTEMPT 10000L    // delay between attempting wifi reconnect, in milliseconds
+#define DHTPIN 2                        // pin of DHT sensor
+#define DHTTYPE DHT22                   // type of DHT sensor
 
-// DHT sensor
+// initialize DHT sensor
 DHT dht(DHTPIN, DHTTYPE);
 
 // data
@@ -35,9 +35,9 @@ void setup() {
   Serial.begin(115200);
   
   // Start up the sensors
-  Serial.println("Version: 6");
+  Serial.println("Version: 20180522T0816");
   Serial.println("Initializing sensors");
-  Serial.println("Using DHT Sensor");
+  Serial.println("Using DHT22 sensor");
 }
 
 void loop() {
@@ -67,7 +67,7 @@ void loop() {
     reconnect = 0;
     // read sensors if applicable
     if ((((unsigned long)millis()) - lastRead) > DELAY_READ) {
-      Serial.println("Read temperatures...");
+      Serial.println("Read data...");
       lastRead = millis();
       readData();
     }
@@ -75,7 +75,7 @@ void loop() {
 
     // print temperatures
     if ((((unsigned long)millis()) - lastPrint) > DELAY_PRINT) {
-      Serial.println("Print temperatures...");
+      Serial.println("Print data...");
       lastPrint = millis();
       printData();
     }
@@ -83,7 +83,7 @@ void loop() {
 
     // post temperatures
     if ((((unsigned long)millis()) - lastPostData) >= DELAY_POST_DATA) {
-      Serial.println("Post temperatures...");
+      Serial.println("Post data...");
       lastPostData = millis();
       sendData();
     }
@@ -105,10 +105,10 @@ void printData() {
   }
   
   Serial.print("Humidity: ");
-  Serial.print(hum);
+  Serial.print(hum, HUM_DECIMALS);
   Serial.print(" %, ");
   Serial.print("Temperature: ");
-  Serial.print(temp);
+  Serial.print(temp, TEMP_DECIMALS);
   Serial.println(" C");
 }
 
